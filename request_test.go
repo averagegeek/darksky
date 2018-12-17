@@ -56,6 +56,38 @@ func TestTimeMachineRequest(t *testing.T) {
 	}
 }
 
+func TestTimeMachineRequestWithSingleOption(t *testing.T) {
+	opts := []Option{
+		LanguageOption("fr"),
+		ExcludeOption([]string{"minutely", "hourly"}),
+		ExtendOption(),
+		UnitOption("ca"),
+	}
+
+	for _, opt := range opts {
+		err := testTimeMachineRequest(opt)
+
+		if err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestTimeMachineRequestWithMultipleOptions(t *testing.T) {
+	opts := []Option{
+		LanguageOption("fr"),
+		ExcludeOption([]string{"minutely", "hourly"}),
+		ExtendOption(),
+		UnitOption("ca"),
+	}
+
+	err := testTimeMachineRequest(opts...)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestUnsupportedLanguageOption(t *testing.T) {
 	testOptionError(t, ErrLanguageNotSupported, LanguageOption("zzz"))
 }
@@ -72,6 +104,31 @@ func TestNotUniqueExcludeOption(t *testing.T) {
 
 func TestUnsupportedUnit(t *testing.T) {
 	testOptionError(t, ErrUnitNotSupported, UnitOption("zzz"))
+}
+
+func TestExcludeCaseOption(t *testing.T) {
+	ex := []string{"minutely", "Minutely"}
+	testOptionError(t, ErrExcludeOptionNotUnique, ExcludeOption(ex))
+}
+
+func TestLanguageCaseOption(t *testing.T) {
+	values := make(url.Values)
+	option := LanguageOption("FR")
+	option(&values)
+
+	if values.Get("lang") != "fr" {
+		t.Error("Language option should have been converted to lower case.")
+	}
+}
+
+func TestUnitCaseOption(t *testing.T) {
+	values := make(url.Values)
+	option := UnitOption("SI")
+	option(&values)
+
+	if values.Get("units") != "si" {
+		t.Error("Unit option should have been converted to lower case.")
+	}
 }
 
 func testForecastRequest(opts ...Option) error {
@@ -99,13 +156,13 @@ func testTimeMachineRequest(opts ...Option) error {
 func testOptionError(t *testing.T, expectedError error, opts ...Option) {
 	_, err := newForecastRequest(defaultToken, defaultLat, defaultLng, opts)
 
-	if err.Error() != expectedError.Error() {
+	if err == nil || err.Error() != expectedError.Error() {
 		t.Errorf("Should have error : %s", expectedError)
 	}
 
 	_, err = newTimeMachineRequest(defaultToken, defaultLat, defaultLng, time.Now(), opts)
 
-	if err.Error() != expectedError.Error() {
+	if err == nil || err.Error() != expectedError.Error() {
 		t.Errorf("Should have error : %s", expectedError)
 	}
 }

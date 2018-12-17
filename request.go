@@ -112,9 +112,10 @@ func newOptionError(value string) *excludeOptionError {
 func LanguageOption(lang string) Option {
 	return func(v *url.Values) error {
 		var supported bool
+		var lowerLang = strings.ToLower(lang)
 
 		for _, sl := range supportedLanguages {
-			if sl == lang {
+			if sl == lowerLang {
 				supported = true
 			}
 		}
@@ -123,7 +124,7 @@ func LanguageOption(lang string) Option {
 			return ErrLanguageNotSupported
 		}
 
-		v.Set(languageOptionKey, lang)
+		v.Set(languageOptionKey, lowerLang)
 
 		return nil
 	}
@@ -131,8 +132,9 @@ func LanguageOption(lang string) Option {
 
 func ExcludeOption(ex []string) Option {
 	return func(v *url.Values) error {
+		lowerExcludes := toLower(ex)
 
-		for _, e := range ex {
+		for _, e := range lowerExcludes {
 			var supported bool
 			var count int
 
@@ -146,7 +148,7 @@ func ExcludeOption(ex []string) Option {
 				return newOptionError(e)
 			}
 
-			for _, excl := range ex {
+			for _, excl := range lowerExcludes {
 				if excl == e {
 					count++
 				}
@@ -155,10 +157,9 @@ func ExcludeOption(ex []string) Option {
 			if count > 1 {
 				return ErrExcludeOptionNotUnique
 			}
-
 		}
 
-		v.Set(excludeOptionKey, "["+strings.Join(ex, ",")+"]")
+		v.Set(excludeOptionKey, "["+strings.Join(lowerExcludes, ",")+"]")
 
 		return nil
 	}
@@ -175,9 +176,10 @@ func ExtendOption() Option {
 func UnitOption(u string) Option {
 	return func(v *url.Values) error {
 		var supported bool
+		lowerUnit := strings.ToLower(u)
 
 		for _, su := range supportedUnits {
-			if su == u {
+			if su == lowerUnit {
 				supported = true
 			}
 		}
@@ -186,10 +188,20 @@ func UnitOption(u string) Option {
 			return ErrUnitNotSupported
 		}
 
-		v.Set(unitOptionKey, u)
+		v.Set(unitOptionKey, lowerUnit)
 
 		return nil
 	}
+}
+
+func toLower(strs []string) []string {
+	lowStrs := make([]string, len(strs))
+
+	for i := 0; i < len(lowStrs); i++ {
+		lowStrs[i] = strings.ToLower(strs[i])
+	}
+
+	return lowStrs
 }
 
 func newForecastRequest(token string, lat, lng float64, opts []Option) (*http.Request, error) {
