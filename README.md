@@ -4,9 +4,9 @@ A Simple implementation of the [darksky](https://darksky.net) API.
 
 ## Usage
 
-First instantiate an api with you secret
+First instantiate an api with your secret (you can sign up for free and get a secret [here](https://darksky.net))
 ```
-    api, err := *darksky.API = darksky.NewAPI("my-secret")
+    api, err := darksky.NewAPI("my-secret")
 ```
 If you need to pass a custom http client, you can use an option like this:
 ```
