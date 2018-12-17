@@ -11,12 +11,12 @@ import (
 )
 
 var (
-	defaultLat   = 37.8267
-	defaultLng   = -122.4233
-	defaultToken = "test-token"
+	defaultLat    = 37.8267
+	defaultLng    = -122.4233
+	defaultSecret = "test-secret"
 
-	defaultForecastURL    = "https://api.darksky.net/forecast/test-token/37.8267,-122.4233"
-	defaultTimeMachineURL = "https://api.darksky.net/forecast/test-token/37.8267,-122.4233,%d"
+	defaultForecastURL    = "https://api.darksky.net/forecast/test-secret/37.8267,-122.4233"
+	defaultTimeMachineURL = "https://api.darksky.net/forecast/test-secret/37.8267,-122.4233,%d"
 
 	ClientMock = &HTTPClientMock{}
 )
@@ -61,7 +61,7 @@ type nopCloser struct {
 func (nopCloser) Close() error { return nil }
 
 func TestGetForecast(t *testing.T) {
-	api, err := NewAPI("test-token", HTTPClientOption(ClientMock))
+	api, err := NewAPI("test-secret", HTTPClientOption(ClientMock))
 
 	if err != nil {
 		t.Error(err)
@@ -77,7 +77,7 @@ func TestGetForecast(t *testing.T) {
 }
 
 func TestGetTimeMachine(t *testing.T) {
-	api, err := NewAPI("test-token", HTTPClientOption(ClientMock))
+	api, err := NewAPI("test-secret", HTTPClientOption(ClientMock))
 
 	if err != nil {
 		t.Error(err)
@@ -93,13 +93,13 @@ func TestGetTimeMachine(t *testing.T) {
 }
 
 func TestRequestWithoutGzipEncoding(t *testing.T) {
-	api, err := NewAPI("test-token", HTTPClientOption(&HTTPClientMock{}))
+	api, err := NewAPI("test-secret", HTTPClientOption(&HTTPClientMock{}))
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	r, err := newForecastRequest(api.token, defaultLat, defaultLng, []Option{})
+	r, err := newForecastRequest(api.secret, defaultLat, defaultLng, []Option{})
 
 	if err != nil {
 		t.Error(err)
@@ -115,16 +115,16 @@ func TestRequestWithoutGzipEncoding(t *testing.T) {
 	validateForecast(t, d)
 }
 
-func TestErrOnEmptyToken(t *testing.T) {
+func TestErrOnEmptySecret(t *testing.T) {
 	_, err := NewAPI("")
 
-	if err != ErrEmptyToken {
-		t.Error("Empty token should return ErrEmptyToken")
+	if err != ErrEmptySecret {
+		t.Error("Empty secret should return ErrEmptySecret")
 	}
 }
 
 func TestErrNilHTTPClient(t *testing.T) {
-	_, err := NewAPI("token", HTTPClientOption(nil))
+	_, err := NewAPI("secret", HTTPClientOption(nil))
 
 	if err != ErrNilHTTPCLient {
 		t.Error("Nil http client should return ErrNilHTTPClient")

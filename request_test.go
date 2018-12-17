@@ -142,7 +142,7 @@ func TestUnitCaseOption(t *testing.T) {
 }
 
 func testForecastRequest(opts ...Option) error {
-	r, err := newForecastRequest(defaultToken, defaultLat, defaultLng, opts)
+	r, err := newForecastRequest(defaultSecret, defaultLat, defaultLng, opts)
 
 	if err != nil {
 		return err
@@ -154,7 +154,7 @@ func testForecastRequest(opts ...Option) error {
 func testTimeMachineRequest(opts ...Option) error {
 	t := time.Now()
 	ts := int32(t.Unix())
-	r, err := newTimeMachineRequest(defaultToken, defaultLat, defaultLng, t, opts)
+	r, err := newTimeMachineRequest(defaultSecret, defaultLat, defaultLng, t, opts)
 
 	if err != nil {
 		return err
@@ -164,13 +164,13 @@ func testTimeMachineRequest(opts ...Option) error {
 }
 
 func testOptionError(t *testing.T, expectedError error, opts ...Option) {
-	_, err := newForecastRequest(defaultToken, defaultLat, defaultLng, opts)
+	_, err := newForecastRequest(defaultSecret, defaultLat, defaultLng, opts)
 
 	if err == nil || err.Error() != expectedError.Error() {
 		t.Errorf("Should have error : %s", expectedError)
 	}
 
-	_, err = newTimeMachineRequest(defaultToken, defaultLat, defaultLng, time.Now(), opts)
+	_, err = newTimeMachineRequest(defaultSecret, defaultLat, defaultLng, time.Now(), opts)
 
 	if err == nil || err.Error() != expectedError.Error() {
 		t.Errorf("Should have error : %s", expectedError)

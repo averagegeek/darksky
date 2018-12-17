@@ -204,14 +204,14 @@ func toLower(strs []string) []string {
 	return lowStrs
 }
 
-func newForecastRequest(token string, lat, lng float64, opts []Option) (*http.Request, error) {
-	path := fmt.Sprintf("/%s/%s/%3.4f,%3.4f", basePath, token, lat, lng)
+func newForecastRequest(secret string, lat, lng float64, opts []Option) (*http.Request, error) {
+	path := fmt.Sprintf("/%s/%s/%3.4f,%3.4f", basePath, secret, lat, lng)
 
 	return newRequest(path, opts)
 }
 
-func newTimeMachineRequest(token string, lat, lng float64, t time.Time, opts []Option) (*http.Request, error) {
-	path := fmt.Sprintf("/%s/%s/%3.4f,%3.4f,%d", basePath, token, lat, lng, int32(t.Unix()))
+func newTimeMachineRequest(secret string, lat, lng float64, t time.Time, opts []Option) (*http.Request, error) {
+	path := fmt.Sprintf("/%s/%s/%3.4f,%3.4f,%d", basePath, secret, lat, lng, int32(t.Unix()))
 
 	return newRequest(path, opts)
 }

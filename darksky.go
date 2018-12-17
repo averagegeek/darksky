@@ -153,14 +153,14 @@ type HTTPClient interface {
 }
 
 type API struct {
-	token  string
+	secret string
 	client HTTPClient
 }
 
 type APIOption func(*API) error
 
 var (
-	ErrEmptyToken    = errors.New("Token cannot be empty.")
+	ErrEmptySecret   = errors.New("Secret cannot be empty.")
 	ErrNilHTTPCLient = errors.New("HTTP client provided cannot be nil")
 )
 
@@ -176,13 +176,13 @@ func HTTPClientOption(c HTTPClient) APIOption {
 	}
 }
 
-func NewAPI(token string, opts ...APIOption) (*API, error) {
-	if token == "" {
-		return nil, ErrEmptyToken
+func NewAPI(secret string, opts ...APIOption) (*API, error) {
+	if secret == "" {
+		return nil, ErrEmptySecret
 	}
 
 	api := &API{
-		token,
+		secret,
 		http.DefaultClient,
 	}
 
@@ -198,7 +198,7 @@ func NewAPI(token string, opts ...APIOption) (*API, error) {
 }
 
 func (api API) Forecast(lat, lng float64, opts ...Option) (wd *APIData, err error) {
-	r, err := newForecastRequest(api.token, lat, lng, opts)
+	r, err := newForecastRequest(api.secret, lat, lng, opts)
 
 	if err != nil {
 		return nil, err
@@ -208,7 +208,7 @@ func (api API) Forecast(lat, lng float64, opts ...Option) (wd *APIData, err erro
 }
 
 func (api API) TimeMachine(lat, lng float64, time time.Time, opts ...Option) (*APIData, error) {
-	r, err := newTimeMachineRequest(api.token, lat, lng, time, opts)
+	r, err := newTimeMachineRequest(api.secret, lat, lng, time, opts)
 
 	if err != nil {
 		return nil, err
