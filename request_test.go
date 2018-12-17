@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 )
@@ -98,36 +99,45 @@ func TestUnSupportedExcludeOption(t *testing.T) {
 }
 
 func TestNotUniqueExcludeOption(t *testing.T) {
-	ex := []string{"minutely", "minutely"}
-	testOptionError(t, ErrExcludeOptionNotUnique, ExcludeOption(ex))
+	for _, se := range supportedExclude {
+		values := []string{se, strings.ToUpper(se)}
+		testOptionError(t, ErrExcludeOptionNotUnique, ExcludeOption(values))
+	}
 }
 
 func TestUnsupportedUnit(t *testing.T) {
 	testOptionError(t, ErrUnitNotSupported, UnitOption("zzz"))
 }
 
-func TestExcludeCaseOption(t *testing.T) {
-	ex := []string{"minutely", "Minutely"}
-	testOptionError(t, ErrExcludeOptionNotUnique, ExcludeOption(ex))
-}
+func TestLanguageUpperCaseOption(t *testing.T) {
+	for _, sl := range supportedLanguages {
+		values := make(url.Values)
+		option := LanguageOption(strings.ToUpper(sl))
+		err := option(&values)
 
-func TestLanguageCaseOption(t *testing.T) {
-	values := make(url.Values)
-	option := LanguageOption("FR")
-	option(&values)
+		if err != nil {
+			t.Error("Should not return an error, only case do not match.")
+		}
 
-	if values.Get("lang") != "fr" {
-		t.Error("Language option should have been converted to lower case.")
+		if values.Get("lang") != sl {
+			t.Error("Language option should have been converted to lower case.")
+		}
 	}
 }
 
 func TestUnitCaseOption(t *testing.T) {
-	values := make(url.Values)
-	option := UnitOption("SI")
-	option(&values)
+	for _, su := range supportedUnits {
+		values := make(url.Values)
+		option := UnitOption(strings.ToUpper(su))
+		err := option(&values)
 
-	if values.Get("units") != "si" {
-		t.Error("Unit option should have been converted to lower case.")
+		if err != nil {
+			t.Error("Should not return an error, only case do not match.")
+		}
+
+		if values.Get("units") != su {
+			t.Error("Unit option should have been converted to lower case.")
+		}
 	}
 }
 
