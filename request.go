@@ -109,6 +109,7 @@ func newOptionError(value string) *excludeOptionError {
 	}
 }
 
+// LanguageOption to have the API response in the specified language.
 func LanguageOption(lang string) Option {
 	return func(v *url.Values) error {
 		var supported bool
@@ -130,6 +131,7 @@ func LanguageOption(lang string) Option {
 	}
 }
 
+// ExcludeOption for when you don't need all the payload, you can choose to exclude some parts.
 func ExcludeOption(ex []string) Option {
 	return func(v *url.Values) error {
 		lowerExcludes := toLower(ex)
@@ -165,6 +167,7 @@ func ExcludeOption(ex []string) Option {
 	}
 }
 
+// ExtendOption will gives you more data hourly.
 func ExtendOption() Option {
 	return func(v *url.Values) error {
 		v.Set(extendOptionKey, extendOptionValue)
@@ -173,6 +176,7 @@ func ExtendOption() Option {
 	}
 }
 
+// UnitOption to decide what unit type you want the data to be formatted to.
 func UnitOption(u string) Option {
 	return func(v *url.Values) error {
 		var supported bool

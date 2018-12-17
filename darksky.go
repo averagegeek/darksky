@@ -19,7 +19,7 @@ const (
 	ExAlerts    = "alerts"
 	ExFlags     = "flags"
 
-	// Languages
+	// Supported Languages
 	LangAR   = "ar"
 	LangAZ   = "az"
 	LangBE   = "be"
@@ -95,12 +95,14 @@ type Alert struct {
 	URI         string   `json:"uri"`
 }
 
+// DataBlock object representation from the API.
 type DataBlock struct {
 	Data    []DataPoint `json:"data"`
 	Summary string      `json:"summary,omitempty"`
 	Icon    string      `json:"icon,omitempty"`
 }
 
+// DataPoint object from the API.
 type DataPoint struct {
 	ApparentTemperature         float64 `json:"apparentTemperature,omitempty"`
 	ApparentTemperatureHigh     float64 `json:"apparentTemperatureHigh,omitempty"`
@@ -141,6 +143,7 @@ type DataPoint struct {
 	WindSpeed                   float64 `json:"windSpeed,omitempty"`
 }
 
+// Flags object from the API
 type Flags struct {
 	DarkskyUnavailable string   `json:"darksky-unavailable,omitempty"`
 	Sources            []string `json:"sources"`
@@ -164,6 +167,7 @@ var (
 	ErrNilHTTPCLient = errors.New("HTTP client provided cannot be nil")
 )
 
+// HTTPClientOption is for when you need a custom client instead of the http.DefaultCLient
 func HTTPClientOption(c HTTPClient) APIOption {
 	return func(api *API) error {
 		if c == nil {
@@ -176,6 +180,7 @@ func HTTPClientOption(c HTTPClient) APIOption {
 	}
 }
 
+// NewAPI is a helper function to create a new API.
 func NewAPI(secret string, opts ...APIOption) (*API, error) {
 	if secret == "" {
 		return nil, ErrEmptySecret
@@ -197,6 +202,7 @@ func NewAPI(secret string, opts ...APIOption) (*API, error) {
 	return api, nil
 }
 
+// Forecast query to the API.
 func (api API) Forecast(lat, lng float64, opts ...Option) (wd *APIData, err error) {
 	r, err := newForecastRequest(api.secret, lat, lng, opts)
 
@@ -207,6 +213,7 @@ func (api API) Forecast(lat, lng float64, opts ...Option) (wd *APIData, err erro
 	return api.handleRequest(r)
 }
 
+// TimeMachine query to the API.
 func (api API) TimeMachine(lat, lng float64, time time.Time, opts ...Option) (*APIData, error) {
 	r, err := newTimeMachineRequest(api.secret, lat, lng, time, opts)
 
