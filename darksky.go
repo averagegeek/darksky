@@ -152,7 +152,7 @@ type Flags struct {
 }
 
 type HTTPClient interface {
-	Do(req *http.Request) (*http.Response, error)
+	Do(*http.Request) (*http.Response, error)
 }
 
 type API struct {

@@ -1,6 +1,6 @@
 # Darksky API Implementation in go
 
-A Simple implementation of the [darksky](https://darksky.net) API.
+A Simple implementation of a [darksky](https://darksky.net) API client.
 
 ## Usage
 
