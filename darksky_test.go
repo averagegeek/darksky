@@ -42,7 +42,9 @@ func (c HTTPClientMock) Do(req *http.Request) (*http.Response, error) {
 		var buf bytes.Buffer
 		zw := gzip.NewWriter(&buf)
 
-		zw.Write([]byte(body))
+		if _, errWrite := zw.Write([]byte(body)); errWrite != nil {
+			return nil, errWrite
+		}
 		zw.Close()
 
 		resp.Body = nopCloser{&buf}
@@ -182,7 +184,8 @@ func validateForecast(t *testing.T, d *APIData) {
 	assertFloat(t, "Hourly.Data[0].Visibility", d.Hourly.Data[0].Visibility, 3.76)
 	assertFloat(t, "Hourly.Data[0].Ozone", d.Hourly.Data[0].Ozone, 270.82)
 
-	assertString(t, "Daily.Summary", d.Daily.Summary, "Rain tomorrow and next Sunday, with high temperatures peaking at 60°F on Wednesday.")
+	assertString(t, "Daily.Summary", d.Daily.Summary,
+		"Rain tomorrow and next Sunday, with high temperatures peaking at 60°F on Wednesday.")
 	assertString(t, "Daily.Icon", d.Daily.Icon, "rain")
 	assertInt(t, "Daily.Data[0].Time", d.Daily.Data[0].Time, 1544342400)
 	assertString(t, "Daily.Data[0].Summary", d.Daily.Data[0].Summary, "Mostly cloudy throughout the day.")

@@ -1,0 +1,47 @@
+{
+  "Vendor": true,
+  "Deadline": "2m",
+  "Sort": ["linter", "severity", "path", "line"],
+  "EnableGC": true,
+  "Linters": {
+    "nakedret": {
+      "Command": "nakedret",
+      "Pattern": "^(?P<path>.*?\\.go):(?P<line>\\d+)\\s*(?P<message>.*)$"
+    }
+  },
+  "WarnUnmatchedDirective": true,
+  "DisableAll": true,
+  "Enable": [
+    "deadcode",
+    "gocyclo",
+    "goimports",
+    "gosimple",
+    "ineffassign",
+    "interfacer",
+    "lll",
+    "misspell",
+    "nakedret",
+    "unconvert",
+    "unparam",
+    "unused"
+  ],
+
+  "Cyclo": 16,
+  "LineLength": 120,
+
+  "Skip": [
+    "services/users/internal/statik",
+    "services/users/internal/pb",
+    "services/accounts/internal/statik",
+    "services/accounts/internal/pb",
+    "services/authentication/internal/statik",
+    "services/authentication/internal/pb",
+    "services/authentication/pkg/grpc/pb",
+    "services/catalog/internal/statik",
+    "services/catalog/internal/pb",
+    "services/product/internal/statik",
+    "services/product/internal/pb",
+    "services/users/internal/statik",
+    "services/users/internal/pb"
+  ]
+}

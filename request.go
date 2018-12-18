@@ -22,11 +22,14 @@ const (
 )
 
 var (
-	ErrLanguageNotSupported   = errors.New("Language provided is not supported.")
-	ErrUnitNotSupported       = errors.New("Unit provided is not supported.")
-	ErrExcludeOptionNotUnique = errors.New("Exclude options must be unique within the same group.")
+	// ErrLanguageNotSupported error message
+	ErrLanguageNotSupported = errors.New("language provided is not supported")
+	// ErrUnitNotSupported error message
+	ErrUnitNotSupported = errors.New("unit provided is not supported")
+	// ErrExcludeOptionNotUnique error message
+	ErrExcludeOptionNotUnique = errors.New("exclude options must be unique within the same group")
 
-	// Supported languages
+	// supportedLanguages Supported languages
 	supportedLanguages = []string{
 		"ar",
 		"az",
@@ -73,7 +76,7 @@ var (
 		"zh-tw",
 	}
 
-	// Supported exclude sections
+	// supportedExclude Supported exclude sections
 	supportedExclude = []string{
 		"currently",
 		"minutely",
@@ -83,7 +86,7 @@ var (
 		"flags",
 	}
 
-	// Supported units
+	// supportedUnits Supported units
 	supportedUnits = []string{
 		"auto",
 		"ca",
@@ -93,6 +96,7 @@ var (
 	}
 )
 
+// Option ...
 type Option func(*url.Values) error
 
 type excludeOptionError struct {

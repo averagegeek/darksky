@@ -12,64 +12,121 @@ import (
 
 const (
 	// Exclude options
+
+	// ExCurrently currently
 	ExCurrently = "currently"
-	ExMinutely  = "minutely"
-	ExHourly    = "hourly"
-	ExDaily     = "daily"
-	ExAlerts    = "alerts"
-	ExFlags     = "flags"
+	// ExMinutely minutely
+	ExMinutely = "minutely"
+	// ExHourly hourly
+	ExHourly = "hourly"
+	// ExDaily daily
+	ExDaily = "daily"
+	// ExAlerts alerts
+	ExAlerts = "alerts"
+	// ExFlags flags
+	ExFlags = "flags"
 
 	// Supported Languages
-	LangAR   = "ar"
-	LangAZ   = "az"
-	LangBE   = "be"
-	LangBG   = "bg"
-	LangBS   = "bs"
-	LangCA   = "ca"
-	LangCS   = "cs"
-	LangDA   = "da"
-	LangDE   = "de"
-	LangEL   = "el"
-	LangEN   = "en"
-	LangES   = "es"
-	LangET   = "et"
-	LangFI   = "fi"
-	LangFR   = "fr"
-	LangHE   = "he"
-	LangHR   = "hr"
-	LangHU   = "hu"
-	LangID   = "id"
-	LangIS   = "is"
-	LangIT   = "it"
-	LangJA   = "ja"
-	LangKA   = "ka"
-	LangKO   = "ko"
-	LangKW   = "kw"
-	LangLV   = "lv"
-	LangNB   = "nb"
-	LangNL   = "nl"
-	LangNO   = "no"
-	LangPL   = "pl"
-	LangPT   = "pt"
-	LangRO   = "ro"
-	LangRU   = "ru"
-	LangSK   = "sk"
-	LangSL   = "sl"
-	LangSR   = "sr"
-	LangSV   = "sv"
-	LangTE   = "te"
-	LangTR   = "tr"
-	LangUK   = "uk"
+
+	// LangAR ...
+	LangAR = "ar"
+	// LangAZ ...
+	LangAZ = "az"
+	// LangBE ...
+	LangBE = "be"
+	// LangBG ...
+	LangBG = "bg"
+	// LangBS ...
+	LangBS = "bs"
+	// LangCA ...
+	LangCA = "ca"
+	// LangCS ...
+	LangCS = "cs"
+	// LangDA ...
+	LangDA = "da"
+	// LangDE ...
+	LangDE = "de"
+	// LangEL ...
+	LangEL = "el"
+	// LangEN ...
+	LangEN = "en"
+	// LangES ...
+	LangES = "es"
+	// LangET ...
+	LangET = "et"
+	// LangFI ...
+	LangFI = "fi"
+	// LangFR ...
+	LangFR = "fr"
+	// LangHE ...
+	LangHE = "he"
+	// LangHR ...
+	LangHR = "hr"
+	// LangHU ...
+	LangHU = "hu"
+	// LangID ...
+	LangID = "id"
+	// LangIS ...
+	LangIS = "is"
+	// LangIT ...
+	LangIT = "it"
+	// LangJA ...
+	LangJA = "ja"
+	// LangKA ...
+	LangKA = "ka"
+	// LangKO ...
+	LangKO = "ko"
+	// LangKW ...
+	LangKW = "kw"
+	// LangLV ...
+	LangLV = "lv"
+	// LangNB ...
+	LangNB = "nb"
+	// LangNL ...
+	LangNL = "nl"
+	// LangNO ...
+	LangNO = "no"
+	// LangPL ...
+	LangPL = "pl"
+	// LangPT ...
+	LangPT = "pt"
+	// LangRO ...
+	LangRO = "ro"
+	// LangRU ...
+	LangRU = "ru"
+	// LangSK ...
+	LangSK = "sk"
+	// LangSL ...
+	LangSL = "sl"
+	// LangSR ...
+	LangSR = "sr"
+	// LangSV ...
+	LangSV = "sv"
+	// LangTE ...
+	LangTE = "te"
+	// LangTR ...
+	LangTR = "tr"
+	// LangUK ...
+	LangUK = "uk"
+	// LangXPIG ...
 	LangXPIG = "x-pig-latin"
-	LangZH   = "zh"
+	// LangZH ...
+	LangZH = "zh"
+	// LangZHTW ...
 	LangZHTW = "zh-tw"
 
 	// Units
+
+	// UnitAuto automatic units
 	UnitAuto = "auto"
-	UnitCA   = "ca"
-	UnitUK2  = "uk2"
-	UnitUS   = "us"
-	UnitSI   = "si"
+	// UnitCA Canada units
+	UnitCA = "ca"
+	// UnitUK2 United Kingdom units
+	UnitUK2 = "uk2"
+	// UnitUS USA units
+	UnitUS = "us"
+	// UnitSI International System of Units units
+	UnitSI = "si"
 )
 
 // APIData represents the whole payload for both request type.
@@ -85,6 +142,7 @@ type APIData struct {
 	Flags     Flags     `json:"flags,omitempty"`
 }
 
+// Alert builds out the alert message object
 type Alert struct {
 	Description string   `json:"description"`
 	Expires     int64    `json:"expires"`
@@ -151,19 +209,24 @@ type Flags struct {
 	Units              string   `json:"units"`
 }
 
+// HTTPClient the HTTP client
 type HTTPClient interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
+// API is the API client and secret
 type API struct {
 	secret string
 	client HTTPClient
 }
 
+// APIOption is an error
 type APIOption func(*API) error
 
 var (
-	ErrEmptySecret   = errors.New("Secret cannot be empty.")
+	// ErrEmptySecret error message
+	ErrEmptySecret = errors.New("secret cannot be empty")
+	// ErrNilHTTPCLient error message
 	ErrNilHTTPCLient = errors.New("HTTP client provided cannot be nil")
 )
 
@@ -239,7 +302,7 @@ func (api *API) handleRequest(r *http.Request) (wd *APIData, err error) {
 
 	err = json.Unmarshal(content, &wd)
 
-	return
+	return wd, err
 }
 
 func extractContent(resp *http.Response) ([]byte, error) {
@@ -262,6 +325,10 @@ func extractContent(resp *http.Response) ([]byte, error) {
 func uncompressGzip(body []byte) ([]byte, error) {
 	buf := bytes.NewBuffer(body)
 	gr, err := gzip.NewReader(buf)
+
+	if err != nil {
+		return nil, err
+	}
 	defer gr.Close()
 
 	if err != nil {
