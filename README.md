@@ -35,7 +35,7 @@ You can pass options to the query like this:
 Those options are :
 - Language through `LanguageOption(lang string)`
 - Extend option through `ExtendOption()`
-- Exclude option throug `ExcludeOption(ex []string)`
-- Unit option throug `UnitOption(unit string)`
+- Exclude option through `ExcludeOption(ex []string)`
+- Unit option through `UnitOption(unit string)`
 
 For more information on the API, please visit https://darksky.net/dev/docs

@@ -22,9 +22,14 @@ const (
 )
 
 var (
-	ErrLanguageNotSupported   = errors.New("Language provided is not supported.")
-	ErrUnitNotSupported       = errors.New("Unit provided is not supported.")
-	ErrExcludeOptionNotUnique = errors.New("Exclude options must be unique within the same group.")
+	// ErrLanguageNotSupported occurs when providing an option with an unsupported language.
+	ErrLanguageNotSupported = errors.New("language provided is not supported")
+
+	// ErrUnitNotSupported occurs when providing an option with an unsupported unit.
+	ErrUnitNotSupported = errors.New("unit provided is not supported")
+
+	// ErrExcludeOptionNotUnique occurs when passing non unique exclude options.
+	ErrExcludeOptionNotUnique = errors.New("exclude options must be unique within the same group")
 
 	// Supported languages
 	supportedLanguages = []string{
@@ -93,6 +98,7 @@ var (
 	}
 )
 
+// Option represents options passed to the query to override default values.
 type Option func(*url.Values) error
 
 type excludeOptionError struct {
