@@ -3,6 +3,7 @@ package darksky
 import (
 	"bytes"
 	"compress/gzip"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -129,6 +130,66 @@ func TestErrNilHTTPClient(t *testing.T) {
 	if err != ErrNilHTTPCLient {
 		t.Error("Nil http client should return ErrNilHTTPClient")
 	}
+}
+
+func ExampleAPI_Forecast() {
+	// Using a mock http client to prevent calling the real api.
+	api, err := NewAPI("SECRET", HTTPClientOption(&HTTPClientMock{}))
+
+	if err != nil {
+		panic(err)
+	}
+
+	data, err := api.Forecast(37.8267, -122.4233,
+		LanguageOption(LangEN),
+		ExcludeOption(ExMinutely, ExHourly),
+		UnitOption(UnitUS),
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Current Weather: %s\n", data.Currently.Summary)
+	fmt.Printf("Current Temperature: %2.2f\n", data.Currently.Temperature)
+
+	// Output:
+	// Current Weather: Overcast
+	// Current Temperature: 48.42
+}
+
+func ExampleAPI_TimeMachine() {
+	// Using a mock http client to prevent calling the real api.
+	api, err := NewAPI("SECRET", HTTPClientOption(&HTTPClientMock{}))
+
+	if err != nil {
+		panic(err)
+	}
+
+	t, err := time.Parse(time.RFC822, "06 Feb 78 19:00 EST")
+
+	if err != nil {
+		panic(err)
+	}
+
+	data, err := api.TimeMachine(37.8267, -122.4233, t,
+		LanguageOption(LangEN),
+		ExcludeOption(ExMinutely, ExHourly),
+		UnitOption(UnitUS),
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Current Weather: %s\n", data.Currently.Summary)
+	fmt.Printf("Current Temperature: %2.2f\n", data.Currently.Temperature)
+	fmt.Printf("Time: %s", time.Unix(data.Currently.Time, 0).Format(time.RFC822))
+
+	// Output:
+	// Current Weather: Mostly Cloudy
+	// Current Temperature: 60.46
+	// Time: 06 Feb 78 19:00 EST
 }
 
 func validateForecast(t *testing.T, d *APIData) {

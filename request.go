@@ -138,7 +138,7 @@ func LanguageOption(lang string) Option {
 }
 
 // ExcludeOption for when you don't need all the payload, you can choose to exclude some parts.
-func ExcludeOption(ex []string) Option {
+func ExcludeOption(ex ...string) Option {
 	return func(v *url.Values) error {
 		lowerExcludes := toLower(ex)
 

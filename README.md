@@ -33,9 +33,9 @@ You can pass options to the query like this:
 ```
 
 Those options are :
-- Language through `LanguageOption(lang string)`
-- Extend option through `ExtendOption()`
-- Exclude option through `ExcludeOption(ex []string)`
-- Unit option through `UnitOption(unit string)`
+- Language through `ex. LanguageOption(LangFR)`
+- Extend option through `ex. ExtendOption()`
+- Exclude option through `ex. ExcludeOption(ExMinutely, ExHourly)`
+- Unit option through `ex. UnitOption(UnitCA)`
 
 For more information on the API, please visit https://darksky.net/dev/docs

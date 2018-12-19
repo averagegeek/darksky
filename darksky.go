@@ -229,7 +229,7 @@ type API struct {
 type APIOption func(*API) error
 
 var (
-	// ErrEmptySecret occurs when you pass an empty token.
+	// ErrEmptySecret occurs when passing an empty token.
 	ErrEmptySecret = errors.New("secret cannot be empty")
 
 	// ErrNilHTTPCLient occurs when adding the option with an empty client.

@@ -20,7 +20,7 @@ func TestForecastRequest(t *testing.T) {
 func TestForecastRequestWithSingleOptions(t *testing.T) {
 	opts := []Option{
 		LanguageOption("fr"),
-		ExcludeOption([]string{"minutely", "hourly"}),
+		ExcludeOption("minutely", "hourly"),
 		ExtendOption(),
 		UnitOption("ca"),
 	}
@@ -37,7 +37,7 @@ func TestForecastRequestWithSingleOptions(t *testing.T) {
 func TestForecastRequestWithMultipleOptions(t *testing.T) {
 	opts := []Option{
 		LanguageOption("fr"),
-		ExcludeOption([]string{"minutely", "hourly"}),
+		ExcludeOption("minutely", "hourly"),
 		ExtendOption(),
 		UnitOption("ca"),
 	}
@@ -60,7 +60,7 @@ func TestTimeMachineRequest(t *testing.T) {
 func TestTimeMachineRequestWithSingleOption(t *testing.T) {
 	opts := []Option{
 		LanguageOption("fr"),
-		ExcludeOption([]string{"minutely", "hourly"}),
+		ExcludeOption("minutely", "hourly"),
 		ExtendOption(),
 		UnitOption("ca"),
 	}
@@ -77,7 +77,7 @@ func TestTimeMachineRequestWithSingleOption(t *testing.T) {
 func TestTimeMachineRequestWithMultipleOptions(t *testing.T) {
 	opts := []Option{
 		LanguageOption("fr"),
-		ExcludeOption([]string{"minutely", "hourly"}),
+		ExcludeOption("minutely", "hourly"),
 		ExtendOption(),
 		UnitOption("ca"),
 	}
@@ -95,13 +95,13 @@ func TestUnsupportedLanguageOption(t *testing.T) {
 
 func TestUnSupportedExcludeOption(t *testing.T) {
 	ex := []string{"zzz"}
-	testOptionError(t, newOptionError("zzz"), ExcludeOption(ex))
+	testOptionError(t, newOptionError("zzz"), ExcludeOption(ex...))
 }
 
 func TestNotUniqueExcludeOption(t *testing.T) {
 	for _, se := range supportedExclude {
 		values := []string{se, strings.ToUpper(se)}
-		testOptionError(t, ErrExcludeOptionNotUnique, ExcludeOption(values))
+		testOptionError(t, ErrExcludeOptionNotUnique, ExcludeOption(values...))
 	}
 }
 
