@@ -234,12 +234,9 @@ func newRequest(path string, opts []Option) (*http.Request, error) {
 	}
 
 	q := url.Query()
-	var err error
 
 	for _, opt := range opts {
-		err = opt(&q)
-
-		if err != nil {
+		if err := opt(&q); err != nil {
 			return nil, err
 		}
 	}

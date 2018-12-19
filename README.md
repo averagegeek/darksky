@@ -1,4 +1,4 @@
-# Darksky API Implementation in go
+# Darksky API Client Implementation in go
 
 A Simple implementation of a [darksky](https://darksky.net) API client.
 
@@ -15,6 +15,16 @@ If you need to pass a custom http client, you can use an option like this:
         darksky.HTTPClientOption(&MyCustomClient{}),
     )
 ```
+It's also possible to pass a logger, for errors that are less relevant to the API user, but still relevant to report. The default logger will be logging to standard error.
+```
+    logger := log.New(os.Stderr, "Darksky API Client - ", log.LstdFlags)
+
+    api, err := darksky.NewAPI(
+        "my-secret",
+        darksky.LoggerOption(logger),
+    )
+```
+
 Then, you can query the API for forecast or time machine request like this:
 
 ```

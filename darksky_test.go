@@ -3,8 +3,10 @@ package darksky
 import (
 	"bytes"
 	"compress/gzip"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"testing"
@@ -43,13 +45,24 @@ func (c HTTPClientMock) Do(req *http.Request) (*http.Response, error) {
 		var buf bytes.Buffer
 		zw := gzip.NewWriter(&buf)
 
-		zw.Write([]byte(body))
-		zw.Close()
+		_, err := zw.Write([]byte(body))
 
-		resp.Body = nopCloser{&buf}
+		if err != nil {
+			return nil, err
+		}
+
+		defer func() {
+			err := zw.Close()
+
+			if err != nil {
+				panic(err)
+			}
+		}()
+
+		resp.Body = nopCloser{&buf, nil}
 		resp.Header.Set("Content-Encoding", "gzip")
 	} else {
-		resp.Body = nopCloser{bytes.NewBufferString(body)}
+		resp.Body = nopCloser{bytes.NewBufferString(body), nil}
 	}
 
 	return resp, nil
@@ -57,9 +70,20 @@ func (c HTTPClientMock) Do(req *http.Request) (*http.Response, error) {
 
 type nopCloser struct {
 	io.Reader
+	err error
 }
 
-func (nopCloser) Close() error { return nil }
+func (np nopCloser) Close() error { return np.err }
+
+type logWriter struct {
+	res []byte
+}
+
+func (lw *logWriter) Write(p []byte) (n int, err error) {
+	lw.res = p
+
+	return len(p), nil
+}
 
 func TestGetForecast(t *testing.T) {
 	api, err := NewAPI("test-secret", HTTPClientOption(ClientMock))
@@ -94,7 +118,7 @@ func TestGetTimeMachine(t *testing.T) {
 }
 
 func TestRequestWithoutGzipEncoding(t *testing.T) {
-	api, err := NewAPI("test-secret", HTTPClientOption(&HTTPClientMock{}))
+	api, err := NewAPI("test-secret", HTTPClientOption(ClientMock))
 
 	if err != nil {
 		t.Error(err)
@@ -132,9 +156,47 @@ func TestErrNilHTTPClient(t *testing.T) {
 	}
 }
 
+func TestErrNilLogger(t *testing.T) {
+	_, err := NewAPI("secret", LoggerOption(nil))
+
+	if err != ErrNilLogger {
+		t.Error("Nil logger should return ErrNilLogger")
+	}
+}
+
+func TestLoggerOption(t *testing.T) {
+	w := &logWriter{}
+	logger := log.New(w, "darksky test - ", log.LstdFlags)
+
+	api, err := NewAPI("secret", LoggerOption(logger))
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	api.logger.Print("Hello logger")
+
+	if !strings.Contains(string(w.res), "darksky test - ") && !strings.Contains(string(w.res), "Hello logger") {
+		t.Error("Custom logger should have been used")
+	}
+}
+
+func TestCloseDefer(t *testing.T) {
+	err := errors.New("Test error")
+	closer := &nopCloser{nil, err}
+	writer := &logWriter{}
+	logger := log.New(writer, "darksky test - ", log.LstdFlags)
+
+	close(closer, logger)
+
+	if !strings.Contains(string(writer.res), "darksky test - ") && !strings.Contains(string(writer.res), "Test error") {
+		t.Error("Closer is returning an error, should have been logged in logger from function parameter.")
+	}
+}
+
 func ExampleAPI_Forecast() {
 	// Using a mock http client to prevent calling the real api.
-	api, err := NewAPI("SECRET", HTTPClientOption(&HTTPClientMock{}))
+	api, err := NewAPI("SECRET", HTTPClientOption(ClientMock))
 
 	if err != nil {
 		panic(err)
@@ -160,7 +222,7 @@ func ExampleAPI_Forecast() {
 
 func ExampleAPI_TimeMachine() {
 	// Using a mock http client to prevent calling the real api.
-	api, err := NewAPI("SECRET", HTTPClientOption(&HTTPClientMock{}))
+	api, err := NewAPI("SECRET", HTTPClientOption(ClientMock))
 
 	if err != nil {
 		panic(err)

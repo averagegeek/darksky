@@ -5,8 +5,11 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -223,17 +226,21 @@ type HTTPClient interface {
 type API struct {
 	secret string
 	client HTTPClient
+	logger *log.Logger
 }
 
 // APIOption to override defaults of the api, like the HTTP client.
 type APIOption func(*API) error
 
 var (
-	// ErrEmptySecret occurs when passing an empty token.
+	// ErrEmptySecret occurs when passing an empty token on api creation.
 	ErrEmptySecret = errors.New("secret cannot be empty")
 
-	// ErrNilHTTPCLient occurs when adding the option with an empty client.
+	// ErrNilHTTPCLient occurs when passing a nil client to the HTTPClientOption.
 	ErrNilHTTPCLient = errors.New("HTTP client provided cannot be nil")
+
+	// ErrNilLogger occurs when passing a nil logger to the LoggerOption.
+	ErrNilLogger = errors.New("logger provided cannot be null")
 )
 
 // HTTPClientOption is for when you need a custom client instead of the http.DefaultCLient
@@ -249,23 +256,39 @@ func HTTPClientOption(c HTTPClient) APIOption {
 	}
 }
 
+// LoggerOption to add custom logging on some error less relevant for the api to return, but still want to know about.
+func LoggerOption(l *log.Logger) APIOption {
+	return func(api *API) error {
+		if l == nil {
+			return ErrNilLogger
+		}
+
+		api.logger = l
+
+		return nil
+	}
+}
+
 // NewAPI is a helper function to create a new API.
 func NewAPI(secret string, opts ...APIOption) (*API, error) {
 	if secret == "" {
 		return nil, ErrEmptySecret
 	}
 
-	api := &API{
-		secret,
-		http.DefaultClient,
-	}
+	api := &API{secret: secret}
 
 	for _, opt := range opts {
-		err := opt(api)
-
-		if err != nil {
+		if err := opt(api); err != nil {
 			return nil, err
 		}
+	}
+
+	if api.client == nil {
+		api.client = http.DefaultClient
+	}
+
+	if api.logger == nil {
+		api.logger = log.New(os.Stderr, "Darksky API Client - ", log.LstdFlags)
 	}
 
 	return api, nil
@@ -300,7 +323,7 @@ func (api *API) handleRequest(r *http.Request) (wd *APIData, err error) {
 		return
 	}
 
-	content, err := extractContent(resp)
+	content, err := extractContent(resp, api.logger)
 
 	if err != nil {
 		return
@@ -311,31 +334,32 @@ func (api *API) handleRequest(r *http.Request) (wd *APIData, err error) {
 	return
 }
 
-func extractContent(resp *http.Response) ([]byte, error) {
+func extractContent(resp *http.Response, logger *log.Logger) ([]byte, error) {
 	content, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	defer close(resp.Body, logger)
 
 	switch resp.Header.Get("Content-Encoding") {
 	case "gzip":
-		return uncompressGzip(content)
+		return uncompressGzip(content, logger)
 	default:
 		return content, err
 	}
 }
 
-func uncompressGzip(body []byte) ([]byte, error) {
+func uncompressGzip(body []byte, logger *log.Logger) ([]byte, error) {
 	buf := bytes.NewBuffer(body)
 	gr, err := gzip.NewReader(buf)
-	defer gr.Close()
 
 	if err != nil {
 		return nil, err
 	}
+
+	defer close(gr, logger)
 
 	b, err := ioutil.ReadAll(gr)
 
@@ -344,4 +368,12 @@ func uncompressGzip(body []byte) ([]byte, error) {
 	}
 
 	return b, err
+}
+
+func close(c io.Closer, l *log.Logger) {
+	err := c.Close()
+
+	if err != nil {
+		l.Println(err)
+	}
 }

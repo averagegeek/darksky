@@ -181,7 +181,9 @@ func validateURL(r *http.Request, expected string, opts []Option) error {
 	q := make(url.Values)
 
 	for _, opt := range opts {
-		opt(&q)
+		if err := opt(&q); err != nil {
+			return err
+		}
 	}
 
 	if queryString := q.Encode(); queryString != "" {
