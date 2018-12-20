@@ -1,4 +1,5 @@
 # Darksky API Client Implementation in go
+[![GoDoc](https://godoc.org/github.com/averagegeek/darksky?status.svg)](https://godoc.org/github.com/averagegeek/darksky)
 
 A Simple implementation of a [darksky](https://darksky.net) API client.
 
@@ -48,4 +49,4 @@ Those options are :
 - Exclude option through `ex. ExcludeOption(ExMinutely, ExHourly)`
 - Unit option through `ex. UnitOption(UnitCA)`
 
-For more information on the API, please visit https://darksky.net/dev/docs
+For more information on the API, please visit https://darksky.net/dev/docs. This is the source of most of the terminology used concerning the API parts. Excerpt from the documentation has also been used as comments in the code to describe the parts that are directly in connection with the official documentation.
