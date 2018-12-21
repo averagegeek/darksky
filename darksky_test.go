@@ -27,9 +27,6 @@ var (
 type HTTPClientMock struct{}
 
 func (c HTTPClientMock) Do(req *http.Request) (*http.Response, error) {
-	resp := new(http.Response)
-	resp.Header = make(map[string][]string)
-
 	urlSplit := strings.Split(req.URL.String(), "/")
 	params := strings.Split(urlSplit[5], ",")
 
@@ -40,6 +37,42 @@ func (c HTTPClientMock) Do(req *http.Request) (*http.Response, error) {
 	} else {
 		body = forecastResponseStub
 	}
+
+	resp, err := formatResponse(body, 200, req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+type HTTPClientErrorMock struct {
+	code        int
+	body        string
+	contentType string
+}
+
+func (unc *HTTPClientErrorMock) Do(req *http.Request) (*http.Response, error) {
+	resp, err := formatResponse(unc.body, unc.code, req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp.Header.Add("Content-Type", unc.contentType)
+
+	return resp, nil
+}
+
+func newErrorClient(code int, body, contentType string) *HTTPClientErrorMock {
+	return &HTTPClientErrorMock{code, body, contentType}
+}
+
+func formatResponse(body string, statusCode int, req *http.Request) (*http.Response, error) {
+	resp := new(http.Response)
+	resp.Header = make(map[string][]string)
+	resp.StatusCode = statusCode
 
 	if req.Header.Get("Accept-Encoding") == "gzip" {
 		var buf bytes.Buffer
@@ -101,6 +134,20 @@ func TestGetForecast(t *testing.T) {
 	validateForecast(t, d)
 }
 
+func TestGetForecastWithInvalidOption(t *testing.T) {
+	api, err := NewAPI("test-secret", HTTPClientOption(ClientMock))
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = api.Forecast(defaultLat, defaultLng, LanguageOption("test"))
+
+	if err != ErrLanguageNotSupported {
+		t.Error("Should have return ErrLanguageNotSupported error")
+	}
+}
+
 func TestGetTimeMachine(t *testing.T) {
 	api, err := NewAPI("test-secret", HTTPClientOption(ClientMock))
 
@@ -115,6 +162,20 @@ func TestGetTimeMachine(t *testing.T) {
 	}
 
 	validateTimeMachine(t, d)
+}
+
+func TestGetTimeMachineWithInvalidOption(t *testing.T) {
+	api, err := NewAPI("test-secret", HTTPClientOption(ClientMock))
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = api.TimeMachine(defaultLat, defaultLng, time.Now(), ExcludeOption("test"))
+
+	if err.Error() != newOptionError("test").Error() {
+		t.Error("Should have return an excludeOptionError")
+	}
 }
 
 func TestRequestWithoutGzipEncoding(t *testing.T) {
@@ -191,6 +252,49 @@ func TestCloseDefer(t *testing.T) {
 
 	if !strings.Contains(string(writer.res), "darksky test - ") && !strings.Contains(string(writer.res), "Test error") {
 		t.Error("Closer is returning an error, should have been logged in logger from function parameter.")
+	}
+}
+
+func TestForecastHttpErrorResponse(t *testing.T) {
+	clients := []struct {
+		code        int
+		message     string
+		contentType string
+	}{
+		{403, "Unauthorized", "text/plain"},
+		{400, "Location out of bounds", "application/json"},
+		{500, "Server Error", "application/json; charset=utf8"},
+	}
+
+	testErr := func(code int, message string, err error) {
+		expectedError := HTTPError(code, message)
+
+		if err.Error() != expectedError.Error() {
+			t.Errorf("Expected error should read : %s got %s", expectedError, err)
+		}
+	}
+
+	for _, c := range clients {
+		var body string
+
+		if strings.Contains(c.contentType, "json") {
+			body = fmt.Sprintf(`{"code":%d,"error":"%s"}`, c.code, c.message)
+		} else {
+			body = c.message
+		}
+
+		errClient := newErrorClient(c.code, body, c.contentType)
+		api, err := NewAPI("test-secret", HTTPClientOption(errClient))
+
+		if err != nil {
+			t.Error(err)
+		}
+
+		_, err = api.Forecast(defaultLat, defaultLng)
+		testErr(c.code, c.message, err)
+
+		_, err = api.TimeMachine(defaultLat, defaultLng, time.Now())
+		testErr(c.code, c.message, err)
 	}
 }
 

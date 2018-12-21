@@ -5,11 +5,13 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -217,6 +219,11 @@ type Flags struct {
 	Units              string   `json:"units"`
 }
 
+type apiError struct {
+	Code int    `json:"code"`
+	Err  string `json:"error"`
+}
+
 // HTTPClient let's you substitute the default http.Client for a custom one.
 type HTTPClient interface {
 	Do(*http.Request) (*http.Response, error)
@@ -316,22 +323,26 @@ func (api API) TimeMachine(lat, lng float64, time time.Time, opts ...Option) (*A
 	return api.handleRequest(r)
 }
 
-func (api *API) handleRequest(r *http.Request) (wd *APIData, err error) {
+func (api *API) handleRequest(r *http.Request) (*APIData, error) {
 	resp, err := api.client.Do(r)
 
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	content, err := extractContent(resp, api.logger)
 
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	err = json.Unmarshal(content, &wd)
+	data, err := unmarshalContent(resp, content)
 
-	return
+	if err != nil {
+		return nil, err
+	}
+
+	return data, err
 }
 
 func extractContent(resp *http.Response, logger *log.Logger) ([]byte, error) {
@@ -349,6 +360,37 @@ func extractContent(resp *http.Response, logger *log.Logger) ([]byte, error) {
 	default:
 		return content, err
 	}
+}
+
+func unmarshalContent(resp *http.Response, content []byte) (*APIData, error) {
+	if resp.StatusCode >= 400 {
+		contentType := resp.Header.Get("Content-Type")
+
+		if contentType == "text/plain" {
+			return nil, HTTPError(resp.StatusCode, string(content))
+		} else if strings.Contains(contentType, "application/json") {
+			var data apiError
+
+			if err := json.Unmarshal(content, &data); err != nil {
+				return nil, err
+			}
+
+			return nil, HTTPError(resp.StatusCode, data.Err)
+		}
+	}
+
+	var data *APIData
+
+	if err := json.Unmarshal(content, &data); err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+// HTTPError formats a txt error to inform it's an HTTP error and also include code.
+func HTTPError(code int, txt string) error {
+	return fmt.Errorf("HTTP %d Error - %s", code, txt)
 }
 
 func uncompressGzip(body []byte, logger *log.Logger) ([]byte, error) {
