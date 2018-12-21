@@ -49,4 +49,4 @@ Those options are :
 - Exclude option through `ex. ExcludeOption(ExMinutely, ExHourly)`
 - Unit option through `ex. UnitOption(UnitCA)`
 
-For more information on the API, please visit https://darksky.net/dev/docs. This is the source of most of the terminology used concerning the API parts. Excerpt from the documentation has also been used as comments in the code to describe the parts that are directly in connection with the official documentation.
+For more information on the API, please visit https://darksky.net/dev/docs. It is the source of most of the terminology used concerning the API parts in this project. Excerpt from the documentation has also been used as comments in the code to describe the parts that are directly in connection with the official documentation.
